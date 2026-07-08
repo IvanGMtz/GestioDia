@@ -1,0 +1,48 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Models;
+
+use App\Models\Scopes\BelongsToTeamScope;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+#[ScopedBy([BelongsToTeamScope::class])]
+class Task extends Model
+{
+    /** @use HasFactory<\Database\Factories\TaskFactory> */
+    use HasFactory;
+
+    protected function casts(): array
+    {
+        return [
+            'task_date' => 'date',
+            'requires_photo' => 'boolean',
+            'completed_at' => 'datetime',
+            'photo_pruned_at' => 'datetime',
+        ];
+    }
+
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
+    }
+
+    public function recurringTask(): BelongsTo
+    {
+        return $this->belongsTo(RecurringTask::class);
+    }
+
+    public function assignedMember(): BelongsTo
+    {
+        return $this->belongsTo(Member::class, 'assigned_member_id');
+    }
+
+    public function completedByMember(): BelongsTo
+    {
+        return $this->belongsTo(Member::class, 'completed_by_member_id');
+    }
+}

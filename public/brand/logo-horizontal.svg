@@ -1,0 +1,6 @@
+<!-- TODO: placeholder — sustituir por el logotipo real (símbolo + wordmark bicolor) sobre fondo claro -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 90" width="360" height="90">
+  <circle cx="45" cy="45" r="38" fill="#2E7D32"/>
+  <path d="M28 47 L40 61 L64 32" stroke="#66BB6A" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="98" y="57" font-family="Poppins, sans-serif" font-size="34" font-weight="700" fill="#2E7D32">Gestio<tspan fill="#66BB6A">Dia</tspan></text>
+</svg>

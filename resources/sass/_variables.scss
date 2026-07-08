@@ -1,0 +1,24 @@
+// Overrides de variables Bootstrap con la identidad de marca GestioDia (AGENT.md §9).
+// Debe importarse ANTES de "bootstrap/scss/bootstrap".
+
+$primary: #2E7D32;
+$success: #66BB6A;
+
+$body-bg: #F7F7F5;
+$body-color: #212121;
+
+$font-family-sans-serif: 'Poppins', sans-serif;
+$font-size-base: 1.125rem; // 18px
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-bold: 700;
+
+$btn-padding-y-lg: .875rem;
+$btn-padding-x-lg: 1.5rem;
+$btn-font-size-lg: 1.125rem;
+
+$border-radius: .75rem;
+$border-radius-sm: .5rem;
+$border-radius-lg: 1rem;
+
+$input-btn-font-size: 1.125rem;

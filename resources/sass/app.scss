@@ -1,0 +1,5 @@
+// Orden de import obligatorio: variables -> fuentes -> bootstrap -> overrides propios.
+@import "variables";
+@import "fonts";
+@import "bootstrap/scss/bootstrap";
+@import "custom";

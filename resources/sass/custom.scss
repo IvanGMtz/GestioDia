@@ -1,0 +1,46 @@
+// Custom properties de marca GestioDia (AGENT.md §9).
+// --gd-green-accent es SOLO para iconos/badges/ilustraciones sin texto: no pasa
+// contraste WCAG AA como fondo de botón con texto ni como color de texto sobre blanco.
+:root {
+    --gd-green-primary: #2E7D32;
+    --gd-green-accent: #66BB6A;
+    --gd-text-primary: #212121;
+    --gd-text-secondary: #616161;
+    --gd-bg: #F7F7F5;
+}
+
+body {
+    background-color: var(--gd-bg);
+}
+
+.text-secondary {
+    // Nunca por debajo de 16px (regla UI obligatoria).
+    font-size: max(1rem, 0.9em);
+}
+
+// $success (--gd-green-accent) queda PROHIBIDO como fondo de botón con texto:
+// forzamos .btn-success a la paleta de marca primaria en vez de al accent.
+.btn-success {
+    --bs-btn-bg: #{$primary};
+    --bs-btn-border-color: #{$primary};
+    --bs-btn-hover-bg: #276929;
+    --bs-btn-hover-border-color: #276929;
+    --bs-btn-active-bg: #235f24;
+    --bs-btn-active-border-color: #235f24;
+}
+
+.fw-medium {
+    font-weight: $font-weight-medium;
+}
+
+// Cifras grandes tipo contador de jornada ("6h 30m").
+.gd-big-figure {
+    font-weight: $font-weight-bold;
+    font-size: 2.5rem;
+    line-height: 1.1;
+}
+
+.btn-lg,
+.btn {
+    min-height: 56px;
+}
