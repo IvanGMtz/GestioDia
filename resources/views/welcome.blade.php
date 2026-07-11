@@ -12,15 +12,8 @@
     </p>
 
     <div class="d-flex gap-3 flex-wrap mb-5">
-        <button type="button" class="btn btn-primary btn-lg">Crear equipo</button>
-        <button type="button" class="btn btn-outline-secondary btn-lg">Unirse a un equipo</button>
-    </div>
-
-    <div class="card" style="max-width: 22rem;">
-        <div class="card-body">
-            <p class="fw-medium mb-1">Jornada de hoy</p>
-            <p class="gd-big-figure text-primary mb-0">6h 30m</p>
-        </div>
+        <a href="{{ route('team.create.show') }}" class="btn btn-primary btn-lg">Crear equipo</a>
+        <a href="{{ route('team.join.show') }}" class="btn btn-outline-secondary btn-lg">Unirse a un equipo</a>
     </div>
 </div>
 @endsection

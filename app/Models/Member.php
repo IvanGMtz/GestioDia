@@ -18,6 +18,16 @@ class Member extends Model
     /** @use HasFactory<\Database\Factories\MemberFactory> */
     use HasFactory;
 
+    protected $fillable = [
+        'team_id',
+        'role',
+        'name',
+        'email',
+        'email_verified_at',
+        'active',
+        'last_seen_at',
+    ];
+
     protected function casts(): array
     {
         return [

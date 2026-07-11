@@ -17,6 +17,16 @@ class RecurringTask extends Model
     /** @use HasFactory<\Database\Factories\RecurringTaskFactory> */
     use HasFactory;
 
+    protected $fillable = [
+        'team_id',
+        'title',
+        'description',
+        'assigned_member_id',
+        'requires_photo',
+        'active',
+        'sort_order',
+    ];
+
     protected function casts(): array
     {
         return [

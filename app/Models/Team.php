@@ -13,6 +13,14 @@ class Team extends Model
     /** @use HasFactory<\Database\Factories\TeamFactory> */
     use HasFactory;
 
+    protected $fillable = [
+        'code',
+        'name',
+        'max_members',
+        'tasks_generated_until',
+        'settings',
+    ];
+
     protected function casts(): array
     {
         return [

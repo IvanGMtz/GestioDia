@@ -16,6 +16,21 @@ class Task extends Model
     /** @use HasFactory<\Database\Factories\TaskFactory> */
     use HasFactory;
 
+    protected $fillable = [
+        'team_id',
+        'recurring_task_id',
+        'task_date',
+        'title',
+        'description',
+        'assigned_member_id',
+        'requires_photo',
+        'completed_at',
+        'completed_by_member_id',
+        'completion_note',
+        'photo_path',
+        'photo_pruned_at',
+    ];
+
     protected function casts(): array
     {
         return [

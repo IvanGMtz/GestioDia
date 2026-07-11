@@ -16,6 +16,18 @@ class WorkSession extends Model
     /** @use HasFactory<\Database\Factories\WorkSessionFactory> */
     use HasFactory;
 
+    protected $fillable = [
+        'team_id',
+        'member_id',
+        'work_date',
+        'clocked_in_at',
+        'clocked_out_at',
+        'auto_closed',
+        'edited_by_member_id',
+        'edit_reason',
+        'original_values',
+    ];
+
     protected function casts(): array
     {
         return [

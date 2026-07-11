@@ -13,6 +13,13 @@ class MagicLink extends Model
     /** @use HasFactory<\Database\Factories\MagicLinkFactory> */
     use HasFactory;
 
+    protected $fillable = [
+        'member_id',
+        'token',
+        'expires_at',
+        'used_at',
+    ];
+
     protected function casts(): array
     {
         return [

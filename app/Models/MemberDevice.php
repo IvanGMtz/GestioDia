@@ -13,6 +13,12 @@ class MemberDevice extends Model
     /** @use HasFactory<\Database\Factories\MemberDeviceFactory> */
     use HasFactory;
 
+    protected $fillable = [
+        'member_id',
+        'device_token',
+        'last_used_at',
+    ];
+
     protected function casts(): array
     {
         return [
