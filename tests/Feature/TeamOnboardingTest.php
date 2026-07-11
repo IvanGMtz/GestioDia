@@ -23,7 +23,7 @@ class TeamOnboardingTest extends TestCase
             'owner_name' => 'Ana',
         ]);
 
-        $response->assertRedirect(route('home.authenticated'));
+        $response->assertRedirect(route('tasks.today'));
         $response->assertCookie('gestiodia_device');
 
         $this->assertDatabaseHas('teams', ['name' => 'Jardines Pérez']);
@@ -39,7 +39,7 @@ class TeamOnboardingTest extends TestCase
 
         $deviceToken = $create->getCookie('gestiodia_device')->getValue();
 
-        $response = $this->withCookie('gestiodia_device', $deviceToken)->get(route('home.authenticated'));
+        $response = $this->withCookie('gestiodia_device', $deviceToken)->get(route('tasks.today'));
 
         $response->assertOk();
         $response->assertSee('Ana');
@@ -57,12 +57,12 @@ class TeamOnboardingTest extends TestCase
 
         $this->withCookie('gestiodia_device', $deviceToken)
             ->get(route('home'))
-            ->assertRedirect(route('home.authenticated'));
+            ->assertRedirect(route('tasks.today'));
     }
 
-    public function test_home_authenticated_redirects_to_landing_without_cookie(): void
+    public function test_tasks_today_redirects_to_landing_without_cookie(): void
     {
-        $this->get(route('home.authenticated'))->assertRedirect(route('home'));
+        $this->get(route('tasks.today'))->assertRedirect(route('home'));
     }
 
     public function test_join_team_with_valid_code_creates_employee_member(): void
@@ -74,7 +74,7 @@ class TeamOnboardingTest extends TestCase
             'member_name' => 'Luis',
         ]);
 
-        $response->assertRedirect(route('home.authenticated'));
+        $response->assertRedirect(route('tasks.today'));
         $response->assertCookie('gestiodia_device');
 
         $this->assertDatabaseHas('members', [

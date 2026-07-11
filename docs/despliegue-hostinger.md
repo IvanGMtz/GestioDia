@@ -17,7 +17,11 @@ Guía paso a paso para desplegar GestioDia (o cualquier proyecto Laravel similar
 
 ## 1. Crear el sitio web y el dominio (temporal o real)
 
-_[Pendiente de documentar con capturas — completar en el próximo despliegue desde cero: pantalla inicial de "Sitios web" → crear sitio → elegir dominio temporal `*.hostingersite.com` o dominio propio.]_
+hPanel → **Sitios web** → **Añadir sitio web** → elige **"Sitio web PHP/HTML personalizado"** (no "Deploy Web App" ni ninguna opción orientada a Node/WordPress — esa es la que da un hosting PHP clásico con Apache + `.htaccess`).
+
+1. Elige el dominio: puedes usar uno propio ya conectado a la cuenta, o pulsar **"Utilizar dominio temporal"** para obtener uno gratuito tipo `algo-random-123456.hostingersite.com` — útil para probar antes de tener el dominio real.
+2. Espera a que Hostinger termine de aprovisionar el sitio (crea la carpeta, certificado SSL, etc.).
+3. Con el sitio ya creado, sigue directo a la sección 2 (conectar el repositorio por Git) — en esta versión del panel, tras crear el sitio se puede pasar directo a "Selecciona el repositorio Git para importar" sin pasos intermedios.
 
 ---
 

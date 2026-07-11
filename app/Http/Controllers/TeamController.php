@@ -30,7 +30,7 @@ class TeamController extends Controller
 
         $this->rememberDevice($request, $result['deviceToken']);
 
-        return redirect()->route('home.authenticated');
+        return redirect()->route('tasks.today');
     }
 
     public function joinShow(): View
@@ -51,7 +51,7 @@ class TeamController extends Controller
 
         $this->rememberDevice($request, $result['deviceToken']);
 
-        return redirect()->route('home.authenticated');
+        return redirect()->route('tasks.today');
     }
 
     private function rememberDevice(Request $request, string $deviceToken): void

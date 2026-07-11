@@ -34,9 +34,11 @@ class Task extends Model
     protected function casts(): array
     {
         return [
-            'task_date' => 'date',
+            'task_date' => 'date:Y-m-d',
+            'assigned_member_id' => 'integer',
             'requires_photo' => 'boolean',
             'completed_at' => 'datetime',
+            'completed_by_member_id' => 'integer',
             'photo_pruned_at' => 'datetime',
         ];
     }

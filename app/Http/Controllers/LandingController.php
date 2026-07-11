@@ -11,7 +11,7 @@ class LandingController extends Controller
     public function __invoke(): View|RedirectResponse
     {
         if (app()->bound(Member::class)) {
-            return redirect()->route('home.authenticated');
+            return redirect()->route('tasks.today');
         }
 
         return view('welcome');

@@ -1,7 +1,9 @@
 <?php
 
-use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LandingController;
+use App\Http\Controllers\OneOffTaskController;
+use App\Http\Controllers\RecurringTaskController;
+use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TeamController;
 use Illuminate\Support\Facades\Route;
 
@@ -15,5 +17,19 @@ Route::prefix('equipo')->name('team.')->group(function () {
 });
 
 Route::middleware('member')->group(function () {
-    Route::get('inicio', [HomeController::class, 'show'])->name('home.authenticated');
+    Route::get('tareas/hoy', [TaskController::class, 'today'])
+        ->middleware('tasks.ensure-generated')
+        ->name('tasks.today');
+
+    Route::post('tareas/{task}/completar', [TaskController::class, 'complete'])->name('tasks.complete');
+
+    Route::middleware('role:EMPLOYER')->group(function () {
+        Route::get('tareas', [RecurringTaskController::class, 'index'])->name('tasks.index');
+        Route::get('tareas/crear', [RecurringTaskController::class, 'create'])->name('tasks.recurring.create');
+        Route::post('tareas', [RecurringTaskController::class, 'store'])->name('tasks.recurring.store');
+        Route::get('tareas/{recurringTask}/editar', [RecurringTaskController::class, 'edit'])->name('tasks.recurring.edit');
+        Route::put('tareas/{recurringTask}', [RecurringTaskController::class, 'update'])->name('tasks.recurring.update');
+        Route::delete('tareas/{recurringTask}', [RecurringTaskController::class, 'destroy'])->name('tasks.recurring.destroy');
+        Route::post('tareas/puntual', [OneOffTaskController::class, 'store'])->name('tasks.oneoff.store');
+    });
 });

@@ -30,6 +30,7 @@ class RecurringTask extends Model
     protected function casts(): array
     {
         return [
+            'assigned_member_id' => 'integer',
             'requires_photo' => 'boolean',
             'active' => 'boolean',
             'sort_order' => 'integer',

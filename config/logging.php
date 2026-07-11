@@ -123,6 +123,13 @@ return [
             'handler' => NullHandler::class,
         ],
 
+        'daily_generation' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/generation.log'),
+            'level' => 'info',
+            'replace_placeholders' => true,
+        ],
+
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
         ],

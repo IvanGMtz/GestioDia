@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'member' => \App\Http\Middleware\EnsureMemberResolved::class,
             'role' => \App\Http\Middleware\EnsureRole::class,
+            'tasks.ensure-generated' => \App\Http\Middleware\EnsureDailyTasksGenerated::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

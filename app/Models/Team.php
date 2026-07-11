@@ -25,7 +25,7 @@ class Team extends Model
     {
         return [
             'max_members' => 'integer',
-            'tasks_generated_until' => 'date',
+            'tasks_generated_until' => 'date:Y-m-d',
             'settings' => 'array',
         ];
     }
