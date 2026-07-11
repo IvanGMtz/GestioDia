@@ -44,3 +44,7 @@ body {
 .btn {
     min-height: 56px;
 }
+
+[x-cloak] {
+    display: none !important;
+}

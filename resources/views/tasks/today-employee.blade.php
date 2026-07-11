@@ -13,6 +13,16 @@
         </div>
     @endif
 
+    @if ($errors->any())
+        <div class="alert alert-danger" role="alert">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     @if ($tasks->isEmpty())
         <p class="text-secondary">Aún no hay tareas hoy.</p>
     @else
@@ -28,7 +38,20 @@
                         @if ($task->completed_at)
                             <p class="text-primary fw-medium mb-0">✓ Completada — {{ $task->completed_at->format('H:i') }}</p>
                         @elseif ($task->requires_photo)
-                            <p class="text-secondary mb-0">Requiere foto de evidencia (próximamente).</p>
+                            <form method="POST" action="{{ route('tasks.complete', $task) }}" enctype="multipart/form-data"
+                                  x-data="{ compressing: false }">
+                                @csrf
+                                <label for="photo-{{ $task->id }}" class="form-label text-secondary">
+                                    Esta tarea requiere una foto de evidencia
+                                </label>
+                                <input type="file" id="photo-{{ $task->id }}" name="photo" accept="image/*" capture="environment"
+                                       class="form-control form-control-lg mb-3" required
+                                       @change="compressing = true; await window.compressPhotoInput($event.target); compressing = false">
+                                <button type="submit" class="btn btn-primary btn-lg w-100" :disabled="compressing">
+                                    <span x-show="!compressing">Completar con foto</span>
+                                    <span x-show="compressing" x-cloak>Comprimiendo foto…</span>
+                                </button>
+                            </form>
                         @else
                             <form method="POST" action="{{ route('tasks.complete', $task) }}">
                                 @csrf

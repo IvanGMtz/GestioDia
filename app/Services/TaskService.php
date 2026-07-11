@@ -9,10 +9,13 @@ use App\Models\RecurringTask;
 use App\Models\Task;
 use App\Models\Team;
 use Carbon\CarbonImmutable;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 
 class TaskService
 {
+    public function __construct(private readonly PhotoService $photoService) {}
+
     public function generateForTeam(Team $team, CarbonImmutable $date): int
     {
         $recurringTasks = RecurringTask::withoutGlobalScopes()
@@ -103,12 +106,13 @@ class TaskService
         $task->delete();
     }
 
-    public function completeTask(Task $task, Member $completedBy, ?string $note): Task
+    public function completeTask(Task $task, Member $completedBy, ?string $note, ?UploadedFile $photo = null): Task
     {
         $task->update([
             'completed_at' => now(),
             'completed_by_member_id' => $completedBy->id,
             'completion_note' => $note,
+            'photo_path' => $photo ? $this->photoService->store($task->team, $photo) : null,
         ]);
 
         return $task;

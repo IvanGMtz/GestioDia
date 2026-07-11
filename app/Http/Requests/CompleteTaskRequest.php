@@ -22,8 +22,24 @@ class CompleteTaskRequest extends FormRequest
      */
     public function rules(): array
     {
+        $requiresPhoto = (bool) $this->route('task')?->requires_photo;
+
         return [
             'note' => ['nullable', 'string', 'max:500'],
+            'photo' => [
+                $requiresPhoto ? 'required' : 'nullable',
+                'file',
+                'image',
+                'mimes:jpeg,jpg,png,webp',
+                'max:5120',
+            ],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'photo.required' => 'Esta tarea requiere una foto de evidencia.',
         ];
     }
 }

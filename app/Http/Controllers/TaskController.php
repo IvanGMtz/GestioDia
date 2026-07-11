@@ -48,7 +48,7 @@ class TaskController extends Controller
 
         Gate::forUser($member)->authorize('complete', $task);
 
-        $taskService->completeTask($task, $member, $request->validated('note'));
+        $taskService->completeTask($task, $member, $request->validated('note'), $request->file('photo'));
 
         return redirect()->route('tasks.today')
             ->with('completed_task', $task->title)

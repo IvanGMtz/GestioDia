@@ -8,25 +8,13 @@ use App\Models\RecurringTask;
 use App\Models\Task;
 use App\Models\Team;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\TestResponse;
-use Illuminate\Support\Str;
+use Tests\Concerns\ActsAsMember;
 use Tests\TestCase;
 
 class TaskWorkflowTest extends TestCase
 {
     use RefreshDatabase;
-
-    private function actingAsMember(Member $member): TestResponse|static
-    {
-        $token = (string) Str::uuid();
-
-        $member->devices()->create([
-            'device_token' => $token,
-            'last_used_at' => now(),
-        ]);
-
-        return $this->withCookie('gestiodia_device', $token);
-    }
+    use ActsAsMember;
 
     public function test_today_route_generates_tasks_lazily_on_first_visit(): void
     {
