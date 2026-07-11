@@ -1,0 +1,23 @@
+<IfModule mod_authz_core.c>
+    <FilesMatch "^\.">
+        Require all denied
+    </FilesMatch>
+    <FilesMatch "\.(env|env\.[a-z]+|lock|log|sqlite|sql)$">
+        Require all denied
+    </FilesMatch>
+</IfModule>
+<IfModule !mod_authz_core.c>
+    <FilesMatch "^\.">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+    <FilesMatch "\.(env|env\.[a-z]+|lock|log|sqlite|sql)$">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
