@@ -31,5 +31,8 @@ Route::middleware('member')->group(function () {
         Route::put('tareas/{recurringTask}', [RecurringTaskController::class, 'update'])->name('tasks.recurring.update');
         Route::delete('tareas/{recurringTask}', [RecurringTaskController::class, 'destroy'])->name('tasks.recurring.destroy');
         Route::post('tareas/puntual', [OneOffTaskController::class, 'store'])->name('tasks.oneoff.store');
+        Route::get('tareas/puntual/{task}/editar', [OneOffTaskController::class, 'edit'])->name('tasks.oneoff.edit');
+        Route::put('tareas/puntual/{task}', [OneOffTaskController::class, 'update'])->name('tasks.oneoff.update');
+        Route::delete('tareas/puntual/{task}', [OneOffTaskController::class, 'destroy'])->name('tasks.oneoff.destroy');
     });
 });

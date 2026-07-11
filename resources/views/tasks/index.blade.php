@@ -97,12 +97,15 @@
         <div class="d-flex flex-column gap-2">
             @foreach ($oneOffTasks as $task)
                 <div class="card">
-                    <div class="card-body">
-                        <p class="fw-medium mb-1">{{ $task->title }}</p>
-                        <p class="text-secondary mb-0">
-                            {{ \Illuminate\Support\Carbon::parse($task->task_date)->translatedFormat('j \d\e F') }} ·
-                            {{ $task->assignedMember->name ?? 'Cualquiera del equipo' }}
-                        </p>
+                    <div class="card-body d-flex justify-content-between align-items-center gap-3">
+                        <div>
+                            <p class="fw-medium mb-1">{{ $task->title }}</p>
+                            <p class="text-secondary mb-0">
+                                {{ \Illuminate\Support\Carbon::parse($task->task_date)->translatedFormat('j \d\e F') }} ·
+                                {{ $task->assignedMember->name ?? 'Cualquiera del equipo' }}
+                            </p>
+                        </div>
+                        <a href="{{ route('tasks.oneoff.edit', $task) }}" class="btn btn-outline-secondary">Editar</a>
                     </div>
                 </div>
             @endforeach

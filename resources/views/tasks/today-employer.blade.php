@@ -9,10 +9,19 @@
 
     @php $completedCount = $tasks->whereNotNull('completed_at')->count(); @endphp
 
-    <div class="card mb-4">
-        <div class="card-body">
-            <p class="fw-medium mb-1">Tareas completadas</p>
-            <p class="gd-big-figure text-primary mb-0">{{ $completedCount }} / {{ $tasks->count() }}</p>
+    <div class="d-flex gap-3 flex-wrap mb-4">
+        <div class="card flex-fill">
+            <div class="card-body">
+                <p class="fw-medium mb-1">Tareas completadas</p>
+                <p class="gd-big-figure text-primary mb-0">{{ $completedCount }} / {{ $tasks->count() }}</p>
+            </div>
+        </div>
+        <div class="card flex-fill">
+            <div class="card-body">
+                <p class="fw-medium mb-1">Código de equipo</p>
+                <p class="gd-big-figure text-primary mb-0">{{ $team->code }}</p>
+                <p class="text-secondary mb-0">Compártelo con quien quieras sumar al equipo.</p>
+            </div>
         </div>
     </div>
 

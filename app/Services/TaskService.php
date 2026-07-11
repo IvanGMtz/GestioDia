@@ -91,6 +91,18 @@ class TaskService
         return $team->tasks()->create($data);
     }
 
+    public function updateOneOff(Task $task, array $data): Task
+    {
+        $task->update($data);
+
+        return $task;
+    }
+
+    public function deleteOneOff(Task $task): void
+    {
+        $task->delete();
+    }
+
     public function completeTask(Task $task, Member $completedBy, ?string $note): Task
     {
         $task->update([
