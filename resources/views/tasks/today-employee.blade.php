@@ -39,17 +39,16 @@
                             <p class="text-primary fw-medium mb-0">✓ Completada — {{ $task->completed_at->format('H:i') }}</p>
                         @elseif ($task->requires_photo)
                             <form method="POST" action="{{ route('tasks.complete', $task) }}" enctype="multipart/form-data"
-                                  x-data="{ compressing: false }">
+                                  x-data="{ uploading: false }" @submit="uploading = true">
                                 @csrf
                                 <label for="photo-{{ $task->id }}" class="form-label text-secondary">
                                     Esta tarea requiere una foto de evidencia
                                 </label>
                                 <input type="file" id="photo-{{ $task->id }}" name="photo" accept="image/*" capture="environment"
-                                       class="form-control form-control-lg mb-3" required
-                                       @change="compressing = true; await window.compressPhotoInput($event.target); compressing = false">
-                                <button type="submit" class="btn btn-primary btn-lg w-100" :disabled="compressing">
-                                    <span x-show="!compressing">Completar con foto</span>
-                                    <span x-show="compressing" x-cloak>Comprimiendo foto…</span>
+                                       class="form-control form-control-lg mb-3" required>
+                                <button type="submit" class="btn btn-primary btn-lg w-100" :disabled="uploading">
+                                    <span x-show="!uploading">Completar con foto</span>
+                                    <span x-show="uploading" x-cloak>Subiendo foto…</span>
                                 </button>
                             </form>
                         @else

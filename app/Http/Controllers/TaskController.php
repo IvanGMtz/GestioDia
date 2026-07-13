@@ -11,6 +11,8 @@ use App\Services\TaskService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
+use Intervention\Image\Exceptions\DecoderException;
+use Intervention\Image\Exceptions\NotSupportedException;
 
 class TaskController extends Controller
 {
@@ -48,7 +50,13 @@ class TaskController extends Controller
 
         Gate::forUser($member)->authorize('complete', $task);
 
-        $taskService->completeTask($task, $member, $request->validated('note'), $request->file('photo'));
+        try {
+            $taskService->completeTask($task, $member, $request->validated('note'), $request->file('photo'));
+        } catch (DecoderException|NotSupportedException) {
+            return back()->withErrors([
+                'photo' => 'No se pudo procesar esa foto. Prueba a hacerla de nuevo o cambia el formato de la cámara a JPEG (Ajustes → Cámara → Formatos → Más compatible).',
+            ]);
+        }
 
         return redirect()->route('tasks.today')
             ->with('completed_task', $task->title)
