@@ -7,6 +7,13 @@
     <p class="text-secondary mb-1">{{ $team->name }} · {{ now()->translatedFormat('l, j \d\e F') }}</p>
     <h1 class="mb-4">Hola, {{ $member->name }}</h1>
 
+    @unless ($member->email_verified_at)
+        <div class="alert alert-warning d-flex justify-content-between align-items-center gap-3">
+            <span>Vincula tu correo para no perder el acceso si pierdes este dispositivo.</span>
+            <a href="{{ route('settings.show') }}" class="btn btn-outline-secondary text-nowrap">Vincular correo</a>
+        </div>
+    @endunless
+
     @php $completedCount = $tasks->whereNotNull('completed_at')->count(); @endphp
 
     <div class="d-flex gap-3 flex-wrap mb-4">

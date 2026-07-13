@@ -16,8 +16,8 @@
                 <div>📋</div>
                 <div class="small fw-medium">Tareas</div>
             </a>
-            <a href="{{ route('work-sessions.weekly') }}"
-               class="text-decoration-none text-center {{ request()->routeIs('work-sessions.weekly') ? 'text-primary' : 'text-secondary' }}">
+            <a href="{{ route('team.members.index') }}"
+               class="text-decoration-none text-center {{ request()->routeIs('team.members.index') || request()->routeIs('work-sessions.weekly') ? 'text-primary' : 'text-secondary' }}">
                 <div>👥</div>
                 <div class="small fw-medium">Equipo</div>
             </a>
@@ -26,6 +26,11 @@
                class="text-decoration-none text-center {{ request()->routeIs('work-sessions.mine') ? 'text-primary' : 'text-secondary' }}">
                 <div>🗓️</div>
                 <div class="small fw-medium">Mi semana</div>
+            </a>
+            <a href="{{ route('settings.show') }}"
+               class="text-decoration-none text-center {{ request()->routeIs('settings.show') ? 'text-primary' : 'text-secondary' }}">
+                <div>⚙️</div>
+                <div class="small fw-medium">Ajustes</div>
             </a>
         @endif
     </div>

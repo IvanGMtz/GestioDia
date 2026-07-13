@@ -13,6 +13,10 @@
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
 </head>
 <body class="@if (app()->bound(\App\Models\Member::class)) pb-nav @endif">
+    @if (app()->bound(\App\Models\Member::class))
+        @include('partials.top-bar')
+    @endif
+
     @yield('content')
 
     @if (app()->bound(\App\Models\Member::class))

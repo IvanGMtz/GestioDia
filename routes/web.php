@@ -1,10 +1,13 @@
 <?php
 
 use App\Http\Controllers\LandingController;
+use App\Http\Controllers\MagicLinkController;
 use App\Http\Controllers\OneOffTaskController;
 use App\Http\Controllers\RecurringTaskController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TeamController;
+use App\Http\Controllers\TeamMembersController;
 use App\Http\Controllers\WorkSessionController;
 use Illuminate\Support\Facades\Route;
 
@@ -17,6 +20,12 @@ Route::prefix('equipo')->name('team.')->group(function () {
     Route::post('unirse', [TeamController::class, 'joinStore'])->name('join.store')->middleware('throttle:team-join');
 });
 
+Route::get('acceso', [MagicLinkController::class, 'showRequestForm'])->name('magic-link.request.show');
+Route::post('acceso', [MagicLinkController::class, 'sendLoginLink'])
+    ->name('magic-link.request.store')
+    ->middleware('throttle:magic-link');
+Route::get('enlace/{token}', [MagicLinkController::class, 'consume'])->name('magic-link.consume');
+
 Route::middleware('member')->group(function () {
     Route::get('tareas/hoy', [TaskController::class, 'today'])
         ->middleware('tasks.ensure-generated')
@@ -27,6 +36,11 @@ Route::middleware('member')->group(function () {
     Route::post('fichaje/entrada', [WorkSessionController::class, 'clockIn'])->name('work-sessions.clock-in');
     Route::post('fichaje/salida', [WorkSessionController::class, 'clockOut'])->name('work-sessions.clock-out');
     Route::get('mi-semana', [WorkSessionController::class, 'mine'])->name('work-sessions.mine');
+
+    Route::get('ajustes', [SettingsController::class, 'show'])->name('settings.show');
+    Route::post('ajustes/email', [SettingsController::class, 'linkEmail'])
+        ->name('settings.link-email')
+        ->middleware('throttle:magic-link');
 
     Route::middleware('role:EMPLOYER')->group(function () {
         Route::get('tareas', [RecurringTaskController::class, 'index'])->name('tasks.index');
@@ -39,6 +53,9 @@ Route::middleware('member')->group(function () {
         Route::get('tareas/puntual/{task}/editar', [OneOffTaskController::class, 'edit'])->name('tasks.oneoff.edit');
         Route::put('tareas/puntual/{task}', [OneOffTaskController::class, 'update'])->name('tasks.oneoff.update');
         Route::delete('tareas/puntual/{task}', [OneOffTaskController::class, 'destroy'])->name('tasks.oneoff.destroy');
+
+        Route::get('equipo', [TeamMembersController::class, 'index'])->name('team.members.index');
+        Route::post('equipo/miembros/{member}/regenerar', [TeamMembersController::class, 'regenerateAccess'])->name('team.members.regenerate-access');
 
         Route::get('equipo/jornadas', [WorkSessionController::class, 'weekly'])->name('work-sessions.weekly');
         Route::get('equipo/jornadas/export', [WorkSessionController::class, 'export'])->name('work-sessions.export');

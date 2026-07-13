@@ -7,13 +7,10 @@ use App\Http\Requests\CreateTeamRequest;
 use App\Http\Requests\JoinTeamRequest;
 use App\Services\TeamService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class TeamController extends Controller
 {
-    private const DEVICE_COOKIE_MINUTES = 60 * 24 * 400;
-
     public function __construct(private readonly TeamService $teamService) {}
 
     public function createShow(): View
@@ -52,20 +49,5 @@ class TeamController extends Controller
         $this->rememberDevice($request, $result['deviceToken']);
 
         return redirect()->route('tasks.today');
-    }
-
-    private function rememberDevice(Request $request, string $deviceToken): void
-    {
-        cookie()->queue(cookie(
-            'gestiodia_device',
-            $deviceToken,
-            self::DEVICE_COOKIE_MINUTES,
-            '/',
-            null,
-            $request->secure(),
-            true,
-            false,
-            'lax',
-        ));
     }
 }

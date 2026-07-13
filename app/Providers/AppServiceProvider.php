@@ -24,5 +24,6 @@ class AppServiceProvider extends ServiceProvider
     {
         RateLimiter::for('team-create', fn (Request $request) => Limit::perHour(3)->by($request->ip()));
         RateLimiter::for('team-join', fn (Request $request) => Limit::perHour(10)->by($request->ip()));
+        RateLimiter::for('magic-link', fn (Request $request) => Limit::perHour(3)->by((string) $request->input('email')));
     }
 }
