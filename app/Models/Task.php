@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 #[ScopedBy([BelongsToTeamScope::class])]
 class Task extends Model
@@ -61,5 +62,10 @@ class Task extends Model
     public function completedByMember(): BelongsTo
     {
         return $this->belongsTo(Member::class, 'completed_by_member_id');
+    }
+
+    public function photoUrl(): ?string
+    {
+        return $this->photo_path ? Storage::disk('public')->url($this->photo_path) : null;
     }
 }

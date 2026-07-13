@@ -43,11 +43,19 @@
             @foreach ($tasks as $task)
                 <div class="card">
                     <div class="card-body d-flex justify-content-between align-items-start gap-3">
-                        <div>
-                            <p class="fw-medium mb-1">{{ $task->title }}</p>
-                            <p class="text-secondary mb-0">
-                                {{ $task->assignedMember->name ?? 'Cualquiera del equipo' }}
-                            </p>
+                        <div class="d-flex align-items-start gap-3">
+                            @if ($task->photoUrl())
+                                <a href="{{ $task->photoUrl() }}" target="_blank" rel="noopener">
+                                    <img src="{{ $task->photoUrl() }}" alt="Foto de evidencia de {{ $task->title }}"
+                                         width="56" height="56" style="object-fit: cover; border-radius: .5rem;">
+                                </a>
+                            @endif
+                            <div>
+                                <p class="fw-medium mb-1">{{ $task->title }}</p>
+                                <p class="text-secondary mb-0">
+                                    {{ $task->assignedMember->name ?? 'Cualquiera del equipo' }}
+                                </p>
+                            </div>
                         </div>
                         @if ($task->completed_at)
                             <span class="text-primary fw-medium text-nowrap">✓ {{ $task->completed_at->format('H:i') }}</span>

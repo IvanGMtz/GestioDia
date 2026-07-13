@@ -107,4 +107,39 @@ class PhotoTest extends TestCase
         $this->assertNotNull($recentTask->fresh()->photo_path);
         $this->assertNull($recentTask->fresh()->photo_pruned_at);
     }
+
+    public function test_employer_sees_photo_thumbnail_on_today_screen(): void
+    {
+        Storage::fake('public');
+
+        $team = Team::factory()->create();
+        $employer = Member::factory()->for($team)->create(['role' => MemberRole::Employer]);
+        $employee = Member::factory()->for($team)->create(['role' => MemberRole::Employee]);
+
+        $task = Task::factory()->for($team)->create([
+            'assigned_member_id' => $employee->id,
+            'requires_photo' => true,
+        ]);
+
+        $this->actingAsMember($employee)->post(route('tasks.complete', $task), [
+            'photo' => UploadedFile::fake()->image('evidencia.jpg', 1200, 900),
+        ]);
+
+        $response = $this->actingAsMember($employer)->get(route('tasks.today'));
+
+        $response->assertOk();
+        $response->assertSee($task->fresh()->photoUrl(), false);
+    }
+
+    public function test_employer_sees_no_thumbnail_when_task_has_no_photo(): void
+    {
+        $team = Team::factory()->create();
+        $employer = Member::factory()->for($team)->create(['role' => MemberRole::Employer]);
+        Task::factory()->for($team)->create(['requires_photo' => false, 'photo_path' => null]);
+
+        $response = $this->actingAsMember($employer)->get(route('tasks.today'));
+
+        $response->assertOk();
+        $response->assertDontSee('Foto de evidencia', false);
+    }
 }
