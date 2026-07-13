@@ -12,7 +12,11 @@
 
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
 </head>
-<body>
+<body class="@if (app()->bound(\App\Models\Member::class)) pb-nav @endif">
     @yield('content')
+
+    @if (app()->bound(\App\Models\Member::class))
+        @include('partials.bottom-nav')
+    @endif
 </body>
 </html>

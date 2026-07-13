@@ -7,6 +7,34 @@
     <p class="text-secondary mb-1">{{ now()->translatedFormat('l, j \d\e F') }}</p>
     <h1 class="mb-4">Hola, {{ $member->name }}</h1>
 
+    @if (session('clock_message'))
+        <div class="alert alert-success text-center" role="alert">
+            <p class="mb-0">✓</p>
+            <p class="gd-big-figure text-primary mb-0">{{ session('clock_message') }}</p>
+        </div>
+    @endif
+
+    @if (session('clock_error'))
+        <div class="alert alert-danger" role="alert">{{ session('clock_error') }}</div>
+    @endif
+
+    <div class="card mb-4">
+        <div class="card-body text-center">
+            @if ($openSession)
+                <p class="text-secondary mb-3">Jornada empezada a las {{ $openSession->clocked_in_at->format('H:i') }}</p>
+                <form method="POST" action="{{ route('work-sessions.clock-out') }}">
+                    @csrf
+                    <button type="submit" class="btn btn-outline-secondary btn-lg w-100">Terminar jornada</button>
+                </form>
+            @else
+                <form method="POST" action="{{ route('work-sessions.clock-in') }}">
+                    @csrf
+                    <button type="submit" class="btn btn-primary btn-lg w-100">Empezar jornada</button>
+                </form>
+            @endif
+        </div>
+    </div>
+
     @if (session('completed_task'))
         <div class="alert alert-success fw-medium" role="alert">
             ✓ Tarea completada — {{ session('completed_at') }}

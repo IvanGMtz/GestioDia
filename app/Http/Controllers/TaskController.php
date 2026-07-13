@@ -7,6 +7,7 @@ use App\Http\Requests\CompleteTaskRequest;
 use App\Models\Member;
 use App\Models\Task;
 use App\Models\Team;
+use App\Models\WorkSession;
 use App\Services\TaskService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
@@ -38,9 +39,12 @@ class TaskController extends Controller
             fn (Task $task) => $task->assigned_member_id === null || $task->assigned_member_id === $member->id
         );
 
+        $openSession = WorkSession::where('member_id', $member->id)->whereNull('clocked_out_at')->first();
+
         return view('tasks.today-employee', [
             'tasks' => $myTasks,
             'member' => $member,
+            'openSession' => $openSession,
         ]);
     }
 
