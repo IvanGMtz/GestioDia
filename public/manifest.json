@@ -1,0 +1,37 @@
+{
+    "name": "GestioDia",
+    "short_name": "GestioDia",
+    "description": "Simple. Útil. Hecho. Todo lo que necesitas para gestionar el día con tu equipo.",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "theme_color": "#2E7D32",
+    "background_color": "#F7F7F5",
+    "lang": "es",
+    "icons": [
+        {
+            "src": "/brand/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/brand/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/brand/icon-192-maskable.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "/brand/icon-512-maskable.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}

@@ -15,7 +15,7 @@ Guía técnica para construir **GestioDia**: app web de gestión de tareas diari
 
 | Capa | Tecnología |
 |---|---|
-| Backend | Laravel 11, PHP 8.3 |
+| Backend | Laravel 12 LTS, PHP 8.3 *(spec original pedía Laravel 11; en la fecha de implementación ya estaba EOL sin parches de seguridad, se optó por la LTS vigente — API prácticamente idéntica, sin impacto en el resto de este documento)* |
 | BD | MySQL (Hostinger) |
 | Frontend | Blade + Bootstrap 5 + Alpine.js + CSS custom |
 | Assets | Vite, compilados en local y subidos (`public/build`) |
@@ -53,12 +53,26 @@ Guía técnica para construir **GestioDia**: app web de gestión de tareas diari
 | team_id | FK teams, cascadeOnDelete | |
 | role | enum(EMPLOYER, EMPLOYEE) | El creador del equipo es EMPLOYER. Un equipo puede tener más de un EMPLOYER |
 | name | string(60) | |
-| device_token | uuid unique nullable | Identidad principal sin login. Se guarda en cookie httpOnly de 400 días |
 | email | string unique nullable | Solo si el usuario vincula email (multi-dispositivo) |
 | email_verified_at | timestamp nullable | |
 | active | boolean default true | Baja lógica; nunca borrar members con historial |
 | last_seen_at | timestamp nullable | |
 | timestamps | | |
+
+*(Implementado: sin columna `device_token` aquí — ver `member_devices` abajo, tal como ya anticipaba la nota de diseño de §5.4.)*
+
+### member_devices
+Identidad por dispositivo sin login. Sustituye por completo al `device_token` único que aparecía en una versión anterior de `members`.
+
+| Columna | Tipo | Notas |
+|---|---|---|
+| id | bigint PK | |
+| member_id | FK members, cascadeOnDelete | |
+| device_token | uuid unique | Se guarda en cookie httpOnly `gestiodia_device`, 400 días |
+| last_used_at | timestamp nullable | |
+| timestamps | | |
+
+Un member puede tener varias filas aquí (multi-dispositivo). Cada creación de equipo, unión, magic link consumido o regeneración de acceso crea una fila nueva.
 
 ### recurring_tasks
 Plantillas de tareas fijas diarias. NO son las tareas del día; son el molde.
@@ -91,7 +105,8 @@ Instancias reales: tanto las generadas desde recurring_tasks como las puntuales.
 | completed_at | timestamp nullable | |
 | completed_by_member_id | FK members nullable | |
 | completion_note | string(500) nullable | |
-| photo_path | string nullable | Ruta relativa en disco `public` |
+| photo_path | string nullable | Ruta relativa en disco `public`. Vuelve a `null` cuando se poda por retención (ver §7) |
+| photo_pruned_at | timestamp nullable | Cuándo se podó la foto por retención; `null` mientras la foto sigue viva |
 | timestamps | | |
 
 **Índice único obligatorio:** `UNIQUE(recurring_task_id, task_date)` (donde recurring_task_id no es null). Es la garantía de idempotencia de la generación diaria: cron y fallback lazy pueden ejecutarse a la vez sin duplicar (usar `insertOrIgnore` / capturar violación de unicidad).
@@ -109,6 +124,7 @@ Registro de jornada (fichaje). En España el empleador debe conservar registros 
 | work_date | date, index | Derivada de clocked_in_at en TZ del equipo |
 | clocked_in_at | timestamp | |
 | clocked_out_at | timestamp nullable | null = jornada abierta |
+| auto_closed | boolean default false | Se marca cuando `clockIn()` cierra sola una sesión olvidada de un día anterior (ver §8) |
 | edited_by_member_id | FK members nullable | Solo EMPLOYER puede corregir |
 | edit_reason | string(255) nullable | Obligatorio si hay edición |
 | original_values | json nullable | Valores previos a la edición (trazabilidad) |
@@ -130,7 +146,8 @@ Registro de jornada (fichaje). En España el empleador debe conservar registros 
 1. **Crear equipo:** formulario (nombre negocio + nombre persona) → crea `team` + `member` EMPLOYER → genera `device_token` → cookie `gestiodia_device` (httpOnly, secure, sameSite=lax, 400 días) → redirect al panel.
 2. **Unirse:** código de equipo + nombre → valida `max_members` contra members activos → crea `member` EMPLOYEE + token + cookie.
 3. **Middleware `ResolveMember`:** lee cookie → busca member activo → inyecta en request. Sin cookie válida → landing.
-4. **Vincular email:** desde ajustes, member introduce email → `MagicLinkService` envía signed URL (SMTP Hostinger, Nodemailer no — usar Mail de Laravel). Al abrir el enlace en otro dispositivo: verifica token, asocia el `device_token` de ese dispositivo... **Nota de diseño:** para multi-dispositivo se necesita tabla pivote `member_devices(member_id, device_token, last_used_at)` en lugar del token único en members. Implementar así desde el inicio; dejar `members.device_token` fuera y usar siempre `member_devices`.
+4. **Vincular email:** desde ajustes, member introduce email → `MagicLinkService` envía un enlace de un solo uso (Mail de Laravel vía SMTP, no Nodemailer). Al abrir el enlace en cualquier dispositivo: verifica el token, marca `email_verified_at` si era la primera vez, y crea una fila nueva en `member_devices` (ver §4) para ese dispositivo — así queda vinculado sin tocar los dispositivos ya existentes del member.
+   - **Recuperación sin email** *(mismo mecanismo, reutilizado)*: la implementación del punto 5 usa este mismo `MagicLinkService` — el EMPLOYER genera el enlace desde la pantalla Equipo, pero en vez de enviarlo por correo lo comparte manualmente (WhatsApp, en persona).
 5. **Recuperación:** si pierde el dispositivo y no vinculó email → el EMPLOYER puede regenerar la invitación del miembro (nueva entrada en member_devices al unirse de nuevo con el mismo member). Si el EMPLOYER pierde acceso sin email → sin recuperación en MVP (avisar en onboarding con banner suave: "Vincula tu correo para no perder el acceso").
 
 ## 6. Generación de tareas diarias
@@ -145,10 +162,11 @@ La lógica de generación vive en un único método `TaskService::generateForTea
 ## 7. Fotos de evidencia
 
 - Input `<input type="file" accept="image/*" capture="environment">` — en móvil abre la cámara directamente.
-- **Compresión en cliente** antes de subir (Alpine + canvas: redimensionar a máx 1600px lado mayor, JPEG calidad 0.7). Crítico en Hostinger: reduce ancho de banda, tiempo de request y disco.
-- Servidor: validar mimes reales, máx 5 MB post-compresión, re-procesar con Intervention Image (GD): redimensionar de nuevo a 1600px máx + strip EXIF (privacidad: quitar GPS). Guardar en `storage/app/public/photos/{team_id}/{Y-m}/` con nombre uuid.
-- `php artisan storage:link` funciona en Hostinger; verificar y si el symlink falla en el hosting, fallback: ruta pública servida por controlador con streaming.
-- **Retención MVP:** las fotos se conservan 90 días; comando `photos:prune` (cron semanal) borra archivo y pone `photo_path = null` dejando `photo_pruned_at` (añadir columna). Comunicarlo en UI ("las fotos se guardan 3 meses"). Sin esto, el disco de Hostinger se llena de forma no acotada.
+- **Sin compresión en cliente** *(implementado distinto al plan original)*: se probó comprimir con Alpine + canvas (`createImageBitmap` + redimensionar a 1600px + JPEG 0.7) antes de subir, pero con fotos de iPhone de alta resolución (12-48 MP) la decodificación en el navegador colgaba/crasheaba Safari — el propio `createImageBitmap` tiene que cargar la imagen original completa en memoria antes de poder reducirla. Se optó por subir el archivo tal cual (máx 30 MB, validado en el Form Request) y dejar **todo** el procesamiento al servidor, que es más rápido y no tiene los límites de memoria de un navegador móvil. Solo defendible porque el objetivo son redes españolas rápidas (fibra/4G-5G); en redes muy lentas convendría retomar la compresión en cliente.
+- Servidor: validar mimes reales (`jpeg,jpg,png,webp` — deliberadamente sin `heic/heif`, que GD no puede decodificar), procesar con Intervention Image (GD): redimensionar a 1600px máx + recodificar a JPEG calidad 85. GD no escribe EXIF al recodificar, así que el GPS se descarta solo (privacidad gratis). Guardar en `storage/app/public/photos/{team_id}/{Y-m}/` con nombre uuid. Envolver la llamada al service en un `try/catch` de `DecoderException`/`NotSupportedException` de Intervention Image para dar un mensaje claro si el archivo no se puede procesar, en vez de un 500.
+- `php artisan storage:link` **falla en Hostinger** (confirmado, no solo "puede fallar"): `exec()` está bloqueado en PHP y el comando depende de eso. Fallback real usado (no el de streaming controller que planteaba la primera versión de este documento, no hizo falta): crear el symlink a mano por SSH una sola vez (`ln -s ../storage/app/public public/storage`) — sobrevive a redespliegues posteriores porque el deploy es `git pull`, no clonado limpio. Detalle completo en `fotos-hostinger.md` (raíz del repo).
+- **Retención MVP:** las fotos se conservan 90 días; comando `photos:prune` (cron semanal) borra archivo y pone `photo_path = null` dejando `photo_pruned_at`. Comunicarlo en UI ("las fotos se guardan 3 meses"). Sin esto, el disco de Hostinger se llena de forma no acotada.
+- El panel EMPLOYER muestra una miniatura clicable de la foto (56×56, enlaza a la imagen completa) junto a cada tarea completada con evidencia, vía un accessor `Task::photoUrl()`.
 
 ## 8. Registro de jornada (MVP)
 
@@ -190,8 +208,10 @@ Reglas de uso: el símbolo nunca se recolorea ni se estira; área de respeto mí
 
 Navegación: barra inferior fija con 3 items máximo, icono + texto siempre (referencia del mockup de marca: Hoy · Equipo · Más).
 
-**Empleado:** Hoy (checklist + botón fichaje) · Mi semana (historial propio) · Ajustes.
+**Empleado:** Hoy (checklist + botón fichaje) · Mi semana (historial propio) · Ajustes. *(3 items, cumple el límite tal cual.)*
 **Empleador:** Hoy (estado del equipo: tareas hechas/pendientes, quién ha fichado) · Tareas (CRUD recurrentes y puntuales) · Equipo (miembros, código de invitación, jornadas semanales, export) · Ajustes.
+
+*(Resolución implementada: EMPLOYER necesita 4 secciones, incompatible con el límite de 3 de la barra inferior. Se resolvió sacando Ajustes de la barra: para EMPLOYER queda como icono fijo en la cabecera de la app, y la barra inferior se queda en 3 items — Hoy · Tareas · Equipo. Para EMPLOYEE, Ajustes sí vive en la barra inferior, ya que ahí solo hay 3 items en total.)*
 
 Reglas UI (obligatorias):
 - Font-size base 18px; botones de acción principal min-height 56px, ancho completo en móvil.
@@ -217,7 +237,11 @@ Reglas UI (obligatorias):
 
 ## 12. Estructura de proyecto
 
-Repo único `gestiodia` (monolito). `app/Services`, `app/Http/Controllers`, `app/Http/Middleware/ResolveMember.php`, `app/Console/Commands/GenerateDailyTasks.php` y `PrunePhotos.php`, `resources/views` con layouts `employer` y `employee`, `lang/es`, `public/brand/` (assets de logo según §9 — si aún no existen los archivos, crear placeholders con los nombres exactos y dejar TODO), `public/fonts/` (Poppins woff2 self-hosted). Seeders de demo (1 team, 3 members, 5 recurring, 2 semanas de histórico) para desarrollo y para las pruebas de carga descritas en el documento de operación.
+Repo único `gestiodia` (monolito). `app/Services`, `app/Http/Controllers`, `app/Http/Middleware/ResolveMember.php`, `app/Console/Commands/GenerateDailyTasks.php` y `PrunePhotos.php`, `public/brand/` (assets de logo según §9 — mientras no llegan los archivos reales, hay placeholders con los nombres exactos y TODO), `public/fonts/` (Poppins woff2 self-hosted). Seeders de demo (1 team, 3 members, 5 recurring, 2 semanas de histórico) para desarrollo y para las pruebas de carga descritas en el documento de operación.
+
+*(Implementado distinto al plan original en un punto: no hay `layouts/employer.blade.php` ni `layouts/employee.blade.php` separados — un único `layouts/app.blade.php` incluye condicionalmente `partials/bottom-nav.blade.php` y `partials/top-bar.blade.php` según el rol del member resuelto en el contenedor. Evita duplicar el layout base para una diferencia que es solo de navegación.)*
+
+Documentación viva del proyecto (fuera de este archivo de spec): `docs/despliegue-hostinger.md` (guía de despliegue paso a paso, con tabla de errores encontrados) y `fotos-hostinger.md` (raíz del repo, guía portable del pipeline de fotos para reutilizar en otros proyectos Hostinger).
 
 ## 13. Fuera de alcance (NO implementar)
 

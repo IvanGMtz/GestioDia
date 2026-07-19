@@ -165,6 +165,31 @@ php artisan migrate --force
 chmod -R 775 storage bootstrap/cache
 ```
 
+### 4.7 Correo (SMTP)
+
+Laravel **solo** lee estas variables exactas para el correo — cualquier otro nombre (`EMAIL_HOST`, `EMAIL_USER`, `SMTP_*`, etc.) se ignora en silencio y la app cae al driver `log` sin avisar, aunque las credenciales estén bien puestas en el `.env`. Si un correo "no llega" y no hay ningún error, **lo primero es comprobar que las variables se llaman exactamente así**:
+
+```
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.hostinger.com
+MAIL_PORT=465
+MAIL_SCHEME=smtps
+MAIL_USERNAME=no-reply@tudominio.com
+MAIL_PASSWORD=
+MAIL_FROM_ADDRESS=no-reply@tudominio.com
+MAIL_FROM_NAME="Nombre del proyecto"
+```
+
+Notas:
+- `MAIL_FROM_ADDRESS` y `MAIL_FROM_NAME` van **separados** — Laravel no interpreta un valor combinado tipo `"Nombre <correo>"` en una sola variable.
+- Puerto 465 → `MAIL_SCHEME=smtps` (SSL implícito). Puerto 587 → deja `MAIL_SCHEME` vacío (STARTTLS automático); es el caso típico de proveedores de pruebas tipo Mailtrap.
+- Verificación rápida sin mandar nada a un usuario real, por SSH o local:
+  ```bash
+  php artisan tinker --execute="dd(config('mail.default'), config('mail.mailers.smtp.host'), config('mail.from'));"
+  ```
+  Si `mail.default` no es `smtp`, o el host sale vacío, las variables no se están leyendo.
+- Para probar el envío real sin arriesgar nada, usa un correo de pruebas tipo Mailtrap (sandbox gratuito) en local, y solo activa las credenciales SMTP reales de Hostinger al desplegar.
+
 ---
 
 ## 5. Subir los assets compilados (`public/build`)
@@ -250,3 +275,5 @@ No hay forma de automatizar los pasos 3-5 en este plan (sin comandos post-despli
 | `SQLSTATE[HY000] [1045] Access denied ... (using password: YES)` en `migrate` | El servidor de hosting no está en la whitelist de MySQL remoto (BD y web son servidores físicos distintos) | Añadir `%` en MySQL remoto (§3) |
 | 500 genérico ("An internal server error has occured"), igual con `APP_DEBUG=true`, sin log en `storage/logs/laravel.log` | El fallo ocurre antes de que Laravel arranque — normalmente Apache/`.htaccess` mal ubicado, no la app | `php artisan about` por SSH para descartar que sea la app; revisar dónde cae realmente el document root |
 | `~/public_html` no existe pero `public_html/algo` (ruta relativa) sí funciona | La sesión SSH no arranca en la raíz cruda de la cuenta (`$HOME`), sino en un directorio específico del dominio | Usar `pwd` y rutas relativas al conectar, no asumir `~/public_html` |
+| Correo no llega y no hay ningún error visible | Variables de `.env` con nombres distintos a los que Laravel espera (`MAIL_HOST` en vez de `EMAIL_HOST`, etc.) → cae al driver `log` en silencio | Usar exactamente los nombres de §4.7; verificar con `config('mail.default')` |
+| Subida de fotos falla o se corta con archivos grandes del móvil (>8MB) | `upload_max_filesize`/`post_max_size` de PHP por debajo del límite que valida la app | hPanel → Avanzado → Configuración PHP → subir ambos a 32M+ (ver `fotos-hostinger.md` en la raíz del repo) |
